@@ -716,8 +716,7 @@ static int plugin_write_enqueue (value_list_t const *vl) /* {{{ */
 
 	pthread_mutex_lock (&write_lock);
 	q = &write_queue[write_queue_head];
-	if (q->vl != NULL)
-		abort();
+	assert (q->vl == NULL);
 	q->vl = vlc;
 
 	/* Store context of caller (read plugin); otherwise, it would not be
@@ -740,8 +739,7 @@ static int plugin_write_enqueue (value_list_t const *vl) /* {{{ */
 		}
 	} else
 		write_queue_length++;
-	if (write_queue_length > write_queue_size)
-		abort();
+	assert (write_queue_length <= write_queue_size);
 
 	pthread_cond_signal (&write_cond);
 	pthread_mutex_unlock (&write_lock);
@@ -770,8 +768,7 @@ static value_list_t *plugin_write_dequeue (void) /* {{{ */
 	q->vl = NULL;
 	write_queue_tail = (write_queue_tail+1)%write_queue_size;
 	write_queue_length--;
-	if (write_queue_length < 0)
-		abort();
+	assert (write_queue_length >= 0);
 
 	pthread_mutex_unlock (&write_lock);
 
