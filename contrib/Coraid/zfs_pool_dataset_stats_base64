@@ -4,9 +4,17 @@
 # Suitable for illumos, OpenSolaris, and Solaris 11 derivatives.
 #
 # Data is collected per-pool and per-pool+dataset. The pool and datasets
-# are referenced by their guid (zpool get guid poolname) as hex numbers.
-# This avoids ambiguity. Cross-reference between poolname or datasetname
-# and its guid is left as an exercise for the consumer.
+# are referenced by their guid (zpool get guid poolname) with the binary
+# 64-bit int guid value transformed to (a variant of) base64. This avoids 
+# ambiguity and character-delimiter collisions in the metrics namespace. 
+# Cross-reference between poolname and its guid is left as an exercise for
+# the consumer.
+#
+# This variant of base64 replaces the '/' character with '#' because
+# collectd's unixsock interface uses '/' as a delimiter. The remaining
+# characters are per RFC4648. Note, the "file system safe" variant of
+# base64 uses the '-' and '_' characters also also collide with collectd's
+# separators. 
 #
 # General output format:
 #    $(uname -n)/ZFS-VOps-POOLGUID/gauge-([rw]lat|[rw]iops|[rw]bw)
@@ -94,14 +102,29 @@ inline int MAX_INTERVALS = 50;      /* exit after this number of intervals */
 BEGIN
 {
     /*
-     * Table for int to hex string conversion
-     * This is needed because dtrace aggregations accept strings as keys,
-     * but there is no sprintf(), so we build a hex string using brute force
+     * Table for int to base64 string conversion
+     * This is a modified version of base64 with the "63" value changed from
+     * "/" to "#" to avoid delimiter conflicts with collectd and related tools
      */
-    hex[0]  = "0"; hex[1]  = "1"; hex[2]  = "2"; hex[3]  = "3";
-    hex[4]  = "4"; hex[5]  = "5"; hex[6]  = "6"; hex[7]  = "7";
-    hex[8]  = "8"; hex[9]  = "9"; hex[10] = "a"; hex[11] = "b";
-    hex[12] = "c"; hex[13] = "d"; hex[14] = "e"; hex[15] = "f";
+    b64[0]  = "A"; b64[1]  = "B"; b64[2]  = "C"; b64[3]  = "D";
+    b64[4]  = "E"; b64[5]  = "F"; b64[6]  = "G"; b64[7]  = "H";
+    b64[8]  = "I"; b64[9]  = "J"; b64[10] = "K"; b64[11] = "L";
+    b64[12] = "M"; b64[13] = "N"; b64[14] = "O"; b64[15] = "P";
+    b64[16] = "Q"; b64[17] = "R"; b64[18] = "S"; b64[19] = "T";
+    b64[20] = "U"; b64[21] = "V"; b64[22] = "W"; b64[23] = "X";
+    b64[24] = "Y"; b64[25] = "Z"; b64[26] = "a"; b64[27] = "b";
+    b64[28] = "c"; b64[29] = "d"; b64[30] = "e"; b64[31] = "f";
+    b64[32] = "g"; b64[33] = "h"; b64[34] = "i"; b64[35] = "j";
+    b64[36] = "k"; b64[37] = "l"; b64[38] = "m"; b64[39] = "n";
+    b64[40] = "o"; b64[41] = "p"; b64[42] = "q"; b64[43] = "r";
+    b64[44] = "s"; b64[45] = "t"; b64[46] = "u"; b64[47] = "v";
+    b64[48] = "w"; b64[49] = "x"; b64[50] = "y"; b64[51] = "z";
+    b64[52] = "0"; b64[53] = "1"; b64[54] = "2"; b64[55] = "3";
+    b64[56] = "4"; b64[57] = "5"; b64[58] = "6"; b64[59] = "7";
+    b64[60] = "8"; b64[61] = "9"; b64[62] = "+"; b64[63] = "#";
+    /* special case for guid values = 0, which should not happen */
+    pool_id[0] = "AA==";
+    dataset_id[0] = "AA==";
 
     interval_count = 0;
 }
@@ -119,49 +142,39 @@ fbt::zfs_write:entry
     self->ts = timestamp;
 }
 
-/* convert the pool guid from uint64 to string of hex and cache the result */
 fbt::zfs_read:entry,
 fbt::zfs_write:entry
 /pool_id[self->pool_guid] == NULL/
 {
-    this->s = strjoin(hex[(self->pool_guid >> 60) & 0xf], hex[(self->pool_guid >> 56) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 52) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 48) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 44) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 40) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 36) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 32) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 28) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 24) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 20) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 16) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 12) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 8) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->pool_guid >> 4) & 0xf]);
-    this->s = strjoin(this->s, hex[self->pool_guid & 0xf]);
+    this->s = strjoin(b64[(self->pool_guid >> 58) & 0x3f], b64[(self->pool_guid >> 52) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 46) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 40) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 34) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 28) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 22) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 16) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 10) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid >> 4) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->pool_guid << 2) & 0x3f]);
+    this->s = strjoin(this->s, "=");
     pool_id[self->pool_guid] = this->s;
 }
 
-/* convert the dataset guid from uint64 to string of hex and cache the result */
 fbt::zfs_read:entry,
 fbt::zfs_write:entry
 /dataset_id[self->dataset_guid] == NULL/
 {
-    this->s = strjoin(hex[(self->dataset_guid >> 60) & 0xf], hex[(self->dataset_guid >> 56) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 52) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 48) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 44) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 40) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 36) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 32) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 28) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 24) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 20) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 16) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 12) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 8) & 0xf]);
-    this->s = strjoin(this->s, hex[(self->dataset_guid >> 4) & 0xf]);
-    this->s = strjoin(this->s, hex[self->dataset_guid & 0xf]);
+    this->s = strjoin(b64[(self->dataset_guid >> 58) & 0x3f], b64[(self->dataset_guid >> 52) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 46) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 40) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 34) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 28) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 22) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 16) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 10) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid >> 4) & 0x3f]);
+    this->s = strjoin(this->s, b64[(self->dataset_guid << 2) & 0x3f]);
+    this->s = strjoin(this->s, "=");
     dataset_id[self->dataset_guid] = this->s;
 }
 
