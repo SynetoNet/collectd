@@ -28,6 +28,9 @@
 # Note: it is expected that the dtrace can fail, in which case this script will
 # automatically try to restart the dtrace collector.
 #
+# Debug hint: set the COLLECTD_CMD environment variable to "cat" and the data
+# is sent to stdout rather than into a collectd unixsock.
+#
 # Copyright 2015 Coraid, Inc.
 #
 # MIT License
