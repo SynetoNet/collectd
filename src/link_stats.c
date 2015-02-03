@@ -219,7 +219,7 @@ link_stats_init(void)
             }
         }
     }
-    ERROR ("cannot find misc kstat info for links");
+    INFO ("cannot find misc kstat info for links");
     return (0);
 }
 
