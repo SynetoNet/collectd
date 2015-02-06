@@ -102,10 +102,10 @@
 #@BUILD_PLUGIN_CONNTRACK_TRUE@LoadPlugin conntrack
 #@BUILD_PLUGIN_CONTEXTSWITCH_TRUE@LoadPlugin contextswitch
 #@BUILD_PLUGIN_CGROUPS_TRUE@LoadPlugin cgroups
-@BUILD_PLUGIN_CPU_TRUE@@BUILD_PLUGIN_CPU_TRUE@LoadPlugin cpu
+#@BUILD_PLUGIN_CPU_TRUE@@BUILD_PLUGIN_CPU_TRUE@LoadPlugin cpu
 #@BUILD_PLUGIN_CPUFREQ_TRUE@LoadPlugin cpufreq
 #@BUILD_PLUGIN_CPU_STATS_TRUE@LoadPlugin cpu_stats
-@LOAD_PLUGIN_CSV@LoadPlugin csv
+#@LOAD_PLUGIN_CSV@LoadPlugin csv
 #@BUILD_PLUGIN_CURL_TRUE@LoadPlugin curl
 #@BUILD_PLUGIN_CURL_JSON_TRUE@LoadPlugin curl_json
 #@BUILD_PLUGIN_CURL_XML_TRUE@LoadPlugin curl_xml
@@ -123,14 +123,14 @@
 #@BUILD_PLUGIN_FSCACHE_TRUE@LoadPlugin fscache
 #@BUILD_PLUGIN_GMOND_TRUE@LoadPlugin gmond
 #@BUILD_PLUGIN_HDDTEMP_TRUE@LoadPlugin hddtemp
-@BUILD_PLUGIN_INTERFACE_TRUE@@BUILD_PLUGIN_INTERFACE_TRUE@LoadPlugin interface
+#@BUILD_PLUGIN_INTERFACE_TRUE@@BUILD_PLUGIN_INTERFACE_TRUE@LoadPlugin interface
 #@BUILD_PLUGIN_IPTABLES_TRUE@LoadPlugin iptables
 #@BUILD_PLUGIN_IPMI_TRUE@LoadPlugin ipmi
 #@BUILD_PLUGIN_IPVS_TRUE@LoadPlugin ipvs
 #@BUILD_PLUGIN_IRQ_TRUE@LoadPlugin irq
 #@BUILD_PLUGIN_JAVA_TRUE@LoadPlugin java
 #@BUILD_PLUGIN_LINK_STATS_TRUE@LoadPlugin link_stats
-@BUILD_PLUGIN_LOAD_TRUE@@BUILD_PLUGIN_LOAD_TRUE@LoadPlugin load
+#@BUILD_PLUGIN_LOAD_TRUE@@BUILD_PLUGIN_LOAD_TRUE@LoadPlugin load
 #@BUILD_PLUGIN_LPAR_TRUE@LoadPlugin lpar
 #@BUILD_PLUGIN_LVM_TRUE@LoadPlugin lvm
 #@BUILD_PLUGIN_MADWIFI_TRUE@LoadPlugin madwifi
@@ -138,13 +138,13 @@
 #@BUILD_PLUGIN_MD_TRUE@LoadPlugin md
 #@BUILD_PLUGIN_MEMCACHEC_TRUE@LoadPlugin memcachec
 #@BUILD_PLUGIN_MEMCACHED_TRUE@LoadPlugin memcached
-@BUILD_PLUGIN_MEMORY_TRUE@@BUILD_PLUGIN_MEMORY_TRUE@LoadPlugin memory
+#@BUILD_PLUGIN_MEMORY_TRUE@@BUILD_PLUGIN_MEMORY_TRUE@LoadPlugin memory
 #@BUILD_PLUGIN_MODBUS_TRUE@LoadPlugin modbus
 #@BUILD_PLUGIN_MULTIMETER_TRUE@LoadPlugin multimeter
 #@BUILD_PLUGIN_MYSQL_TRUE@LoadPlugin mysql
 #@BUILD_PLUGIN_NETAPP_TRUE@LoadPlugin netapp
 #@BUILD_PLUGIN_NETLINK_TRUE@LoadPlugin netlink
-@LOAD_PLUGIN_NETWORK@LoadPlugin network
+#@LOAD_PLUGIN_NETWORK@LoadPlugin network
 #@BUILD_PLUGIN_NFS_TRUE@LoadPlugin nfs
 #@BUILD_PLUGIN_NFSSVR_STATS_TRUE@LoadPlugin nfssvr_stats
 #@BUILD_PLUGIN_NGINX_TRUE@LoadPlugin nginx
@@ -174,7 +174,7 @@
 #@BUILD_PLUGIN_ROUTEROS_TRUE@LoadPlugin routeros
 #@BUILD_PLUGIN_RPC_STATS_TRUE@LoadPlugin rpc_stats
 #@BUILD_PLUGIN_RRDCACHED_TRUE@LoadPlugin rrdcached
-@LOAD_PLUGIN_RRDTOOL@LoadPlugin rrdtool
+#@LOAD_PLUGIN_RRDTOOL@LoadPlugin rrdtool
 #@BUILD_PLUGIN_SENSORS_TRUE@LoadPlugin sensors
 #@BUILD_PLUGIN_SERIAL_TRUE@LoadPlugin serial
 #@BUILD_PLUGIN_SIGROK_TRUE@LoadPlugin sigrok
@@ -732,16 +732,16 @@
 #	IgnoreSelected false
 #</Plugin>
 
-@LOAD_PLUGIN_NETWORK@<Plugin network>
+#@LOAD_PLUGIN_NETWORK@<Plugin network>
 #	# client setup:
-@LOAD_PLUGIN_NETWORK@	Server "ff18::efc0:4a42" "25826"
-@LOAD_PLUGIN_NETWORK@	<Server "239.192.74.66" "25826">
+#@LOAD_PLUGIN_NETWORK@	Server "ff18::efc0:4a42" "25826"
+#@LOAD_PLUGIN_NETWORK@	<Server "239.192.74.66" "25826">
 #		SecurityLevel Encrypt
 #		Username "user"
 #		Password "secret"
 #		Interface "eth0"
 #		ResolveInterval 14400
-@LOAD_PLUGIN_NETWORK@	</Server>
+#@LOAD_PLUGIN_NETWORK@	</Server>
 #	TimeToLive "128"
 #
 #	# server setup:
@@ -761,7 +761,7 @@
 #
 #	# "garbage collection"
 #	CacheFlush 1800
-@LOAD_PLUGIN_NETWORK@</Plugin>
+#@LOAD_PLUGIN_NETWORK@</Plugin>
 
 #<Plugin nfssvr_stats>
 #   # Reduce clutter by disabling unused NFS versions or features
