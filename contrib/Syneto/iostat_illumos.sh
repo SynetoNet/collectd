@@ -3,6 +3,7 @@ MY_PATH=$(readlink -f `dirname $0`)
 . $MY_PATH/iostat_illumos_functions.sh
 
 INTERVAL=${COLLECTD_INTERVAL:-10}
+INTERVAL=${INTERVAL%.*}
 HOSTNAME=${COLLECTD_HOSTNAME:-`hostname`}
 
 while read -r line; do
