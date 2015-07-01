@@ -8,7 +8,7 @@ function isStatisticsForADisk() {
 }
 
 function getColumnValueFromIostatLine() {
-	echo "$1" | awk -v col=$2 '{print $col}'
+	echo "$1" | /usr/gnu/bin/awk -v col=$2 '{print $col}'
 }
 
 function getDeviceFromIostatLine() {
