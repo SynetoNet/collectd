@@ -3,6 +3,15 @@
 MIN_VALID_STATISTICS_VALUE=0
 MAX_VALID_STATISTICS_THRESHOLD=7200000
 
+function isAStatisticsLine() {
+	echo "$1" | /usr/gnu/bin/grep -E -e "[[:blank:]]+[[:digit:]].*" >/dev/null
+}
+
+function isAnIgnoredStatisticsLine() {
+	echo "$1" | /usr/gnu/bin/grep -E -e "[[:digit:]][[:blank:]]+fd0" >/dev/null \
+	|| echo "$1" | /usr/gnu/bin/grep -E -e ":/" >/dev/null
+}
+
 function isStatisticsForADisk() {
 	echo "$1" | /usr/gnu/bin/grep -E -e "c[0-9]+t.*d.*" >/dev/null 2>&1
 }

@@ -5,6 +5,24 @@ setUp() {
 	. $MY_PATH/iostat_illumos_functions.sh
 }
 
+testItRecognizesIostatHeaderLines() {
+	isAStatisticsLine "                    extended device statistics              "
+	assertFalse "First iostat header line should not be recognized as a statistics line" $?
+
+	isAStatisticsLine "    r/s    w/s   kr/s   kw/s wait actv wsvc_t asvc_t  %w  %b device"
+	assertFalse "Second iostat header line should not be recognized as a statistics line" $?
+}
+
+testItIgnoresFloppyDisk() {
+	isAnIgnoredStatisticsLine "    0.0    0.0    0.0    0.0  0.0  0.0    0.0    0.0   0   0 fd0"
+	assertTrue "Floppy disk should have been ignored" $?
+}
+
+testItIgnoresNFSMounts() {
+	isAnIgnoredStatisticsLine "    0.0    0.0    0.0    0.0  0.0  0.0    0.0    0.0   0   0 192.168.1.101:/Volumes/SourceRepos/unistore/StorageCLI"
+	assertTrue "NFS mounts should have been ignored" $?
+}
+
 testItRecognizesThatAnIostatLineWithASataDiskIsForDiskTypeDevices() {
 	local disk="c3t0d0"
 	isStatisticsForADisk "    0.0    0.0    0.0    0.0  0.0  0.0    0.0    0.0   0   0 $disk"

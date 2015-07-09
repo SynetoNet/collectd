@@ -7,40 +7,55 @@ INTERVAL=${INTERVAL%.*}
 HOSTNAME=${COLLECTD_HOSTNAME:-`hostname`}
 
 while read -r line; do
-	if isStatisticsForADisk "$line"; then
-		DISK=$(getDeviceFromIostatLine "$line")
+	isAnIgnoredStatisticsLine "$line"
+	isAnIgnoredLine=$?
+	isAStatisticsLine "$line"
+	isAHeaderLine=$?
+	if [ "$isAnIgnoredLine" == "0" -o "$isAHeaderLine" != "0" ]; then
+		continue
+	fi
 
-		iopsReadRS=$(getIopsReadRS "$line")
-		isValidValue "$iopsReadRS" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-iops_read-rs interval=$INTERVAL N:$iopsReadRS"
+	isStatisticsForADisk "$line"
+	IS_FOR_DISK=$?
+	if [ "$IS_FOR_DISK" == "0" ]; then
+		TYPE="disk"
+	elif [ "$IS_FOR_DISK" != "0" ]; then
+		TYPE="pool"
+	fi
 
-		iopsWriteWS=$(getIopsWriteWS "$line")
-		isValidValue "$iopsWriteWS" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-iops_write-ws interval=$INTERVAL N:$iopsWriteWS"
+	DEVICE=$(getDeviceFromIostatLine "$line")
 
-		bandwidthReadKRS=$(getBandwidthReadKRS "$line")
-		isValidValue "$bandwidthReadKRS" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-bandwidth_read-krs interval=$INTERVAL N:$bandwidthReadKRS"
+	iopsReadRS=$(getIopsReadRS "$line")
+	isValidValue "$iopsReadRS" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-iops_read-rs interval=$INTERVAL N:$iopsReadRS"
 
-		bandwidthWritesKWS=$(getBandwidthWritesKWS "$line")
-		isValidValue "$bandwidthWritesKWS" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-bandwidth_write-kws interval=$INTERVAL N:$bandwidthWritesKWS"
+	iopsWriteWS=$(getIopsWriteWS "$line")
+	isValidValue "$iopsWriteWS" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-iops_write-ws interval=$INTERVAL N:$iopsWriteWS"
 
-		waitingTransactions=$(getWaitingTransactions "$line")
-		isValidValue "$waitingTransactions" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-wait_transactions-wait interval=$INTERVAL N:$waitingTransactions"
+	bandwidthReadKRS=$(getBandwidthReadKRS "$line")
+	isValidValue "$bandwidthReadKRS" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-bandwidth_read-krs interval=$INTERVAL N:$bandwidthReadKRS"
 
-		activeTransactions=$(getActiveTransactions "$line")
-		isValidValue "$activeTransactions" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-active_transactions-actv interval=$INTERVAL N:$activeTransactions"
+	bandwidthWritesKWS=$(getBandwidthWritesKWS "$line")
+	isValidValue "$bandwidthWritesKWS" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-bandwidth_write-kws interval=$INTERVAL N:$bandwidthWritesKWS"
 
-		waitAverageServiceTime=$(getWaitAverageServiceTime "$line")
-		isValidValue "$waitAverageServiceTime" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-wait_avg_service_time-wsvc_t interval=$INTERVAL N:$waitAverageServiceTime"
+	waitingTransactions=$(getWaitingTransactions "$line")
+	isValidValue "$waitingTransactions" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-wait_transactions-wait interval=$INTERVAL N:$waitingTransactions"
 
-		activeAverageServiceTime=$(getActiveAverageServiceTime "$line")
-		isValidValue "$activeAverageServiceTime" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-active_avg_service_time-asvc_t interval=$INTERVAL N:$activeAverageServiceTime"
+	activeTransactions=$(getActiveTransactions "$line")
+	isValidValue "$activeTransactions" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-active_transactions-actv interval=$INTERVAL N:$activeTransactions"
 
-		waitPercent=$(getWaitPercent "$line")
-		isValidValue "$waitPercent" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-wait_percent-w interval=$INTERVAL N:$waitPercent"
+	waitAverageServiceTime=$(getWaitAverageServiceTime "$line")
+	isValidValue "$waitAverageServiceTime" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-wait_avg_service_time-wsvc_t interval=$INTERVAL N:$waitAverageServiceTime"
 
-		activePercent=$(getActivePercent "$line")
-		isValidValue "$activePercent" && echo "PUTVAL $HOSTNAME/iostat-disk-$DISK/gauge-active_percent-b interval=$INTERVAL N:$activePercent"
+	activeAverageServiceTime=$(getActiveAverageServiceTime "$line")
+	isValidValue "$activeAverageServiceTime" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-active_avg_service_time-asvc_t interval=$INTERVAL N:$activeAverageServiceTime"
 
-    fi
+	waitPercent=$(getWaitPercent "$line")
+	isValidValue "$waitPercent" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-wait_percent-w interval=$INTERVAL N:$waitPercent"
+
+	activePercent=$(getActivePercent "$line")
+	isValidValue "$activePercent" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-active_percent-b interval=$INTERVAL N:$activePercent"
+
+
 done < <(/usr/bin/iostat -xn $INTERVAL)
 
 
