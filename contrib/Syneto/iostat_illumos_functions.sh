@@ -33,11 +33,13 @@ function getIopsWriteWS() {
 }
 
 function getBandwidthReadKRS() {
-	getColumnValueFromIostatLine "$1" "3"
+	local readsInKb=$(getColumnValueFromIostatLine "$1" "3")
+	echo "$readsInKb*1024" | /usr/bin/bc
 }
 
 function getBandwidthWritesKWS() {
-	getColumnValueFromIostatLine "$1" "4"
+	local writesInKB=$(getColumnValueFromIostatLine "$1" "4")
+	echo "$writesInKB*1024" | /usr/bin/bc
 }
 
 function getWaitingTransactions() {

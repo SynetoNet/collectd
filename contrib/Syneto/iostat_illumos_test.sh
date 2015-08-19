@@ -84,14 +84,16 @@ testItCanFindIopsWriteWSFromAnIostatLine() {
 
 testItCanFindBandwidthReadKRSFromAnIostatLine() {
 	local kiloReadsPerSecond="99.88"
+	local readsInBytes="102277.12"
 	local iostatLine="    0.0    0.0    $kiloReadsPerSecond    0.0  0.0  0.0    0.0    0.0   0   0 c1t1d0"
-	assertEquals $kiloReadsPerSecond $(getBandwidthReadKRS "$iostatLine")
+	assertEquals $readsInBytes $(getBandwidthReadKRS "$iostatLine")
 }
 
-testItCanFindBandwidthWriteKWSFromAnIostatLine() {
+testItCanFindBandwidthWriteInBytesFromAnIostatLine() {
 	local kiloWritesPerSecond="99.88"
+	local writesInBytes="102277.12"
 	local iostatLine="    0.0    0.0    0.0    $kiloWritesPerSecond  0.0  0.0    0.0    0.0   0   0 c1t1d0"
-	assertEquals $kiloWritesPerSecond $(getBandwidthWritesKWS "$iostatLine")
+	assertEquals $writesInBytes $(getBandwidthWritesKWS "$iostatLine")
 }
 
 testItCanFindWaitTransactionsFromAnIostatLine() {
