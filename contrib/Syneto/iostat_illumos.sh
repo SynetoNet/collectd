@@ -56,7 +56,7 @@ while read -r line; do
 	isValidValue "$activePercent" && echo "PUTVAL $HOSTNAME/iostat-$TYPE-$DEVICE/gauge-active_percent-b interval=$INTERVAL N:$activePercent"
 
 
-done < <(/usr/bin/iostat -xn $INTERVAL)
+done < <(/usr/bin/iostat -xn 10)
 
 
 
